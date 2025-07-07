@@ -1,25 +1,34 @@
-// index.js
-import express from "express";
-import dotenv from "dotenv";
-import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./swagger.js";
-import translateRoutes from "./routes/translate.js";
-import authRoutes from "./routes/auth.js";
-
-dotenv.config();
+import express from 'express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import authRoutes from './routes/auth.js';
 
 const app = express();
-app.use(express.json());
+const port = 3000;
 
-// Load routes
-app.use("/", translateRoutes);
-app.use("/", authRoutes);
+app.use(express.json()); 
 
-// Serve Swagger UI
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log(`Swagger UI at http://localhost:${PORT}/docs`);
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Auth API',
+      version: '1.0.0',
+      description: 'Login/Logout API using Swagger docs',
+    },
+  },
+  apis: ['./routes/*.js'], 
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Swagger UI
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Routes
+app.use('/auth', authRoutes);
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
